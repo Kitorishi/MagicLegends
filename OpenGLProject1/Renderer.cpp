@@ -47,7 +47,7 @@ void Renderer::inicializar()
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    // Nota el tamaño: sizeof(quadVertices) ahora es más grande
+    // sizeof(quadVertices) ahora es más grande
     glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
@@ -103,7 +103,6 @@ GLuint Renderer::cargarTextura(const char* ruta)
 }
 
 // Función para dibujar sprites (Personajes y Fondo)
-// Función para dibujar sprites (Personajes y Fondo) UPDATEADA
 void Renderer::dibujarSprite(float x, float y, float ancho, float alto, GLuint texturaID, glm::vec3 tinte, bool voltearX)
 {
     if (!shaderProgram || !VAO) return;
@@ -120,7 +119,7 @@ void Renderer::dibujarSprite(float x, float y, float ancho, float alto, GLuint t
     GLint useTexLoc = glGetUniformLocation(shaderProgram, "useTexture");
     GLint samplerLoc = glGetUniformLocation(shaderProgram, "spriteTexture");
 
-    // === NUEVO: Ubicación del uniform de volteo ===
+    //  Ubicación del uniform de volteo
     GLint flipLoc = glGetUniformLocation(shaderProgram, "flipX");
 
     // Enviar datos al shader
@@ -131,7 +130,7 @@ void Renderer::dibujarSprite(float x, float y, float ancho, float alto, GLuint t
     glUniform1i(useTexLoc, 1);  // 1 = ACTIVAR MODO TEXTURA
     glUniform1i(samplerLoc, 0); // Usar unidad de textura 0
 
-    // Enviar el booleano de volteo ===
+    // Enviar el booleano de volteo 
     // OpenGL usa enteros (1 o 0) para representar booleanos en glUniform1i
     glUniform1i(flipLoc, voltearX ? 1 : 0);
 
