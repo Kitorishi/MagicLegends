@@ -16,8 +16,6 @@ Construir un juego 2D con:
 
 ## 🧰 Requisitos de Pre-instalación
 
-> El repositorio contiene una solución `OpenGLProject1.sln` y una carpeta `External/glm`, lo cual indica que el proyecto está preparado para compilarse en **Visual Studio** sobre Windows.
-
 ### Sistema
 - Windows 10/11  
 - Visual Studio 2017/2019/2022  
