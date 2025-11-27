@@ -1,25 +1,25 @@
 #version 330 core
 
 // Atributos de entrada
-layout (location = 0) in vec2 aPos;      // Posici髇 del v閞tice (x,y)
+layout (location = 0) in vec2 aPos;      // Posici贸n del v茅rtice (x,y)
 layout (location = 1) in vec2 aTexCoord; // Coordenada de textura original (u,v)
 
 // Salidas al Fragment Shader
 out vec2 vLocalPos;
 out vec2 vTexCoord; 
 
-// Variables uniformes (configuraci髇 desde C++)
+// Variables uniformes (configuraci贸n desde C++)
 uniform vec2 offset;
 uniform vec2 scale;
-// === NUEVO: Interruptor para voltear horizontalmente ===
+//  Interruptor para voltear horizontalmente ===
 uniform bool flipX; 
 
 void main()
 {
-    // Posici髇 local para c醠culos de formas geom閠ricas
+    // Posici贸n local para c谩lculos de formas geom茅tricas
     vLocalPos = aPos + vec2(0.5, 0.5);
     
-    // === L覩ICA DE VOLTEO ===
+    // === L脫GICA DE VOLTEO ===
     // Si flipX es verdadero, invertimos la coordenada X de la textura.
     // La coordenada de textura va de 0.0 (izquierda) a 1.0 (derecha).
     // Al hacer (1.0 - x), el lado izquierdo se vuelve derecho y viceversa.
@@ -31,7 +31,7 @@ void main()
     }
     // ========================
 
-    // Transformaci髇 de posici髇 al mundo
+    // Transformaci贸n de posici贸n al mundo
     vec2 worldPos = aPos * scale + offset;
     gl_Position = vec4(worldPos, 0.0, 1.0);
 }
