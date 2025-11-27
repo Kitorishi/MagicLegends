@@ -8,10 +8,11 @@
 
 using namespace std;
 
-
 //Constructor de la clase Personaje
 Personaje::Personaje(string nombre, int vida, int ataque)
-	: nombre(nombre), vida(vida), vidaMaxima(vida), ataqueBase(ataque) {}
+    : nombre(nombre), vida(vida), vidaMaxima(vida), ataqueBase(ataque) {
+}
+
 
 //Funcion que verifica si el personaje sigue vivo
 bool Personaje::estaVivo() const { return vida > 0; }
@@ -19,16 +20,18 @@ bool Personaje::estaVivo() const { return vida > 0; }
 //Funcion de recibir daño
 void Personaje::recibirDanio(int danio)
 {
-	vida -= std::max(danio, 0);
-	cout << nombre << " recibe " << danio << " de daño. Vida restante: " << std::max(vida, 0) << "\n";
+    if (danio <= 0) return;
+    vida -= danio;
+    if (vida < 0) vida = 0;
+    marcarGolpeado();
 }
 
 //Factor de curacion aleatorio entre 20 y 30 puntos de vida
 void Personaje::curarse()
 {
-	int cuantoCura = 20 + rand() % 11; 
-	vida = std::min(vida + cuantoCura, vidaMaxima);
-	cout << nombre << "se cura " << cuantoCura << " puntos de vida. Vida actual: " << vida << "\n";
+    int cuantoCura = 20 + rand() % 11;
+    vida = std::min(vida + cuantoCura, vidaMaxima);
+    cout << nombre << "se cura " << cuantoCura << " puntos de vida. Vida actual: " << vida << "\n";
 }
 
 //Funcion que aplica el veneno a un personaje durante un numero determinado de turnos
@@ -45,43 +48,27 @@ void Personaje::reducirAtaque(int turnos)
 	cout << nombre << " ha tenido su ataque reducido por " << turnos << " turnos.\n";
 }
 
-//Funcion que muestra la barra de vida del personaje
-void Personaje::mostrarBarraVida() const
-{
-	const int anchoBarra = 20;
-	float porcentaje = static_cast<float>(vida) / vidaMaxima;
-	int llenado = static_cast<int>(porcentaje * anchoBarra);
-	cout << nombre << " [";
-	for (int i = 0; i < anchoBarra; ++i)
-	{
-		if (i < llenado)
-			cout << "#";
-		else
-			cout << "-";
-	}
-	cout << "] " << std::max(vida, 0) << "/" << vidaMaxima << "\n";
-}
-
 
 //Funcion que aplica los efectos de estado al personaje
 void Personaje::aplicarEfectos()
 {
-	if (turnosVeneno > 0)
-	{
-		int danioVeneno = 5;
-		vida -= danioVeneno;
-		cout << nombre << " sufre " << danioVeneno << " de daño por el veneno. Vida restante: " << std::max(vida, 0) << "\n";
-		turnosVeneno--;
-	}
-	if (turnosAtaqueReducido > 0)
-	{
-		turnosAtaqueReducido--;
-		if (turnosAtaqueReducido == 0)
-		{
-			cout << nombre << " recupera su fuerza de ataque.\n";
-		}
-	}
+    if (turnosVeneno > 0)
+    {
+        int danioVeneno = 5;
+        vida -= danioVeneno;
+        cout << nombre << " sufre " << danioVeneno << " de daño por el veneno. Vida restante: " << std::max(vida, 0) << "\n";
+        turnosVeneno--;
+    }
+    if (turnosAtaqueReducido > 0)
+    {
+        turnosAtaqueReducido--;
+        if (turnosAtaqueReducido == 0)
+        {
+            cout << nombre << " recupera su fuerza de ataque.\n";
+        }
+    }
 }
+
 
 /*
 * Esta es la parte donde se encuentran los personajes
@@ -233,23 +220,3 @@ void Azrael::ejecutarAccion(int opcion, Personaje* enemigo)
     aplicarEfectos();
 }
 
-// ===== Función seleccionarPersonaje =====
-
-//int seleccionarPersonaje(int jugador)
-//{
-//    int eleccion;
-//    cout << "\n=== JUGADOR " << jugador << " ===\n";
-//    cout << "1. Mĕilì (espada)\n";
-//    cout << "2. Løla Morthen (magia)\n";
-//    cout << "3. Mephistopheless (arco)\n";
-//    cout << "4. Azrael el Maldito (maldiciones)\n";
-//    cout << "Elige tu personaje (1-4): ";
-//
-//    while (!(cin >> eleccion) || eleccion < 1 || eleccion > 4)
-//    {
-//        cout << "Entrada inválida. Intenta de nuevo (1-4): ";
-//        cin.clear();
-//        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-//    }
-//    return eleccion;
-//}

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 #include <Windows.h>
 #include <thread>
 #include <chrono>
@@ -14,8 +15,10 @@
 #include <sstream>
 #include <string>
 #include "Personaje.h"
-//#include "Renderer.h"
+#include "Renderer.h"
 #include <string>
+#include <algorithm>
+#include <cmath> 
 
 const int WINDOW_WIDTH = 960;
 const int WINDOW_HEIGHT = 640;
@@ -37,31 +40,9 @@ enum class EstadoJuego
     Fin
 };
 
-//Shaders embedidos 
-const char* simpleVertexShaderSrc = R"(
-    #version 330 core
-    layout(location = 0) in vec2 aPos;
+//Variables Globales para el los ids de texturas
+GLuint texMeili, texLola, texMephisto, texAzrael;
 
-    uniform vec2 offset;  // posición del rectángulo
-    uniform vec2 scale;   // tamaño del rectángulo
-
-    void main()
-    {
-        vec2 pos = aPos * scale + offset;
-        gl_Position = vec4(pos, 0.0, 1.0);
-    }
-)";
-
-const char* simpleFragmentShaderSrc = R"(
-    #version 330 core
-    out vec4 FragColor;
-    uniform vec3 color;
-
-    void main()
-    {
-        FragColor = vec4(color, 1.0);
-    }
-)";
 
 double tiempoUltimaAccion = 0.0;
 const double COOLDOWN_ACCION = 0.5; // 0.5 segundos de cooldown entre acciones
@@ -104,88 +85,16 @@ int main()
     }
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << "\n";
 
-    //======SHADER SIMPLE DE PRUEBA =======
-    std::cout << "[Main] Compilando shader mínimo...\n";
-
-    GLuint vShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vShader, 1, &simpleVertexShaderSrc, nullptr);
-    glCompileShader(vShader);
-
-    GLint success;
-    char infoLog[512];
-    glGetShaderiv(vShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vShader, 512, nullptr, infoLog);
-        std::cerr << "[Main] Error compilando vertex shader mínimo:\n" << infoLog << "\n";
-    }
-
-    GLuint fShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fShader, 1, &simpleFragmentShaderSrc, nullptr);
-    glCompileShader(fShader);
-    glGetShaderiv(fShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(fShader, 512, nullptr, infoLog);
-        std::cerr << "[Main] Error compilando fragment shader mínimo:\n" << infoLog << "\n";
-    }
-
-    GLuint simpleProgram = glCreateProgram();
-    glAttachShader(simpleProgram, vShader);
-    glAttachShader(simpleProgram, fShader);
-    glLinkProgram(simpleProgram);
-    glGetProgramiv(simpleProgram, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        glGetProgramInfoLog(simpleProgram, 512, nullptr, infoLog);
-        std::cerr << "[Main] Error enlazando shader mínimo:\n" << infoLog << "\n";
-    }
-
-    glDeleteShader(vShader);
-    glDeleteShader(fShader);
-
-    // ====== GEOMETRÍA MÍNIMA (triángulo) ======
-    // Quad centrado en el origen, de tamaño 1x1 en NDC
-    float quadVertices[] = {
-        // x,    y
-        -0.5f,  0.5f,   // arriba izquierda
-         0.5f,  0.5f,   // arriba derecha
-         0.5f, -0.5f,   // abajo derecha
-        -0.5f, -0.5f    // abajo izquierda
-    };
-
-    unsigned int quadIndices[] = {
-        0, 1, 2,
-        2, 3, 0
-    };
-
-    GLuint quadVAO, quadVBO, quadEBO;
-    glGenVertexArrays(1, &quadVAO);
-    glGenBuffers(1, &quadVBO);
-    glGenBuffers(1, &quadEBO);
-
-    glBindVertexArray(quadVAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadEBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quadIndices), quadIndices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glBindVertexArray(0);
-
-    std::cout << "[Main] Shader y quad mínimo preparados.\n";
-
     //Inicializar el Renderer
-    /*std::cout << "Antes de crear Renderer\n";
     Renderer renderer;
     std::cout << "Antes de inicializar Renderer\n";
     renderer.inicializar();
     std::cout << "Renderer inicializado correctamente\n";
-    */
+    texMeili = renderer.cargarTextura("meili.png");
+    texLola = renderer.cargarTextura("lola.png");
+    texMephisto = renderer.cargarTextura("mephisto.png");
+    texAzrael = renderer.cargarTextura("azrael.png");
+    
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     glClearColor(0.0f, 0.05f, 0.25f, 1.0f);
 
@@ -222,7 +131,14 @@ int main()
             if (k4 == GLFW_RELEASE) tecla4Soltada = true;
 
             return opcion;
-        };
+    };
+
+	texMeili = renderer.cargarTextura("meili.png");
+	texLola = renderer.cargarTextura("lola.png");
+	texMephisto = renderer.cargarTextura("mephisto.png");
+	texAzrael = renderer.cargarTextura("azrael.png");
+
+	GLuint texFondo = renderer.cargarTextura("fondoJuego.png");
 
     while (!glfwWindowShouldClose(window))
     {
@@ -262,7 +178,7 @@ int main()
                 jugador2 = crearPersonajePorOpcion(opcion, false);
                 std::cout << "Jugador 2 ha elegido a " << jugador2->obtenerNombre() << "\n";
                 estado = EstadoJuego::TurnoPJ1;
-                std::cout << "Comienza el combate. Turno de " << jugador1->obtenerNombre()
+                std::cout << "Comienza el combate. Turno de " << jugador1->obtenerNombre() 
                     << " (Jugador 1). Acciones (1-4)\n";
             }
             break;
@@ -304,36 +220,82 @@ int main()
             break;
 
         case EstadoJuego::Fin:
-            // Si quieres cerrar la ventana al terminar:
-            // glfwSetWindowShouldClose(window, GLFW_TRUE);
             break;
         }
 
-        // 4. Render (lo que ya tienes)
+
+        //-----------Variables para el estado visual del turno -----------
+		bool turnoJugador1 = (estado == EstadoJuego::TurnoPJ1);
+		bool turnoJugador2 = (estado == EstadoJuego::TurnoPJ2);
+		float yPJ1 = -0.3f; //Altura de barra de vida PJ1
+		float yPJ2 = -0.3f; //Altura de barra de vida PJ2
+		const float offsetSalto = 0.28f; //Offset de salto visual
+
+        // 4. Render, para el dibujo del ambiente
         glClear(GL_COLOR_BUFFER_BIT);
+        renderer.dibujarSprite(0.0f, 0.0f, 2.0f, 2.0f, texFondo, glm::vec3(1.0f));
 
-        glUseProgram(simpleProgram);
-        glBindVertexArray(quadVAO);
-
-        GLint offsetLoc = glGetUniformLocation(simpleProgram, "offset");
-        GLint scaleLoc = glGetUniformLocation(simpleProgram, "scale");
-        GLint colorLoc = glGetUniformLocation(simpleProgram, "color");
-
-        // Dibujar solo si los jugadores ya existen
+        /*
+        * Dibujo de los personajes y casos especificos 
+        * Resaltado de personajes cunado toda el turno 
+        * Efecto de Golpear y curacion
+        */
         if (jugador1 != nullptr)
         {
-            glUniform3f(colorLoc, 1.0f, 0.2f, 0.2f);
-            glUniform2f(offsetLoc, -0.6f, -0.2f);
-            glUniform2f(scaleLoc, 0.25f, 0.25f);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            float xPJ1 = -0.6f;
+            float baseY = yPJ1;
+
+            //Determinar que textura se va a usar
+			GLuint texActual;
+            if(jugador1->obtenerNombre() == "Mĕilì") texActual = texMeili;
+            else if(jugador1->obtenerNombre() == "Løla") texActual = texLola;
+            else if(jugador1->obtenerNombre() == "Mephistopheless") texActual = texMephisto;
+			else if (jugador1->obtenerNombre() == "Azrael") texActual = texAzrael;
+
+			glm::vec3 tinte = glm::vec3(1.0f); // Blanco por defecto (color original del sprite)
+            if (turnoJugador1) tinte = glm::vec3(1.2f, 1.2f, 1.2f); // Brilla un poco
+            if (jugador1->estaGolpeado()) tinte = glm::vec3(1.0f, 0.5f, 0.5f); // Rojo si le pegan
+            if (!turnoJugador1) tinte = glm::vec3(0.7f, 0.7f, 0.7f); // Oscuro si no es su turno
+
+            renderer.dibujarSprite(xPJ1, baseY + 0.25f, 0.40f, 0.60f, texActual, tinte);
+            
+            // Dibujar barra de vida
+            float porcentaje = (float)jugador1->obtenerVida() / jugador1->obetenervidaMaxima();
+            porcentaje = std::fmax(0.0f, std::fmin(porcentaje, 1.0f));
+            renderer.dibujarRectangulo(
+                xPJ1, baseY + 0.60f,
+                0.25f * porcentaje, 0.03f,
+                glm::vec3(0.0f, 1.0f, 0.0f)
+            );
         }
 
         if (jugador2 != nullptr)
         {
-            glUniform3f(colorLoc, 0.2f, 0.4f, 1.0f);
-            glUniform2f(offsetLoc, 0.6f, 0.2f);
-            glUniform2f(scaleLoc, 0.25f, 0.25f);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            float xPJ2 = 0.6f;
+            float baseY = yPJ2;
+
+            //Determinar que textura se va a usar
+            GLuint texActual;
+            if (jugador2->obtenerNombre() == "Mĕilì") texActual = texMeili;
+            else if (jugador2->obtenerNombre() == "Løla") texActual = texLola;
+            else if (jugador2->obtenerNombre() == "Mephistopheless") texActual = texMephisto;
+            else if (jugador2->obtenerNombre() == "Azrael") texActual = texAzrael;
+
+            glm::vec3 tinte = glm::vec3(1.0f); // Blanco por defecto (color original del sprite)
+            if (turnoJugador2) tinte = glm::vec3(1.2f, 1.2f, 1.2f); // Brilla un poco
+            if (jugador2->estaGolpeado()) tinte = glm::vec3(1.0f, 0.5f, 0.5f); // Rojo si le pegan
+            if (!turnoJugador2) tinte = glm::vec3(0.7f, 0.7f, 0.7f); // Oscuro si no es su turno
+
+            renderer.dibujarSprite(xPJ2, baseY + 0.25f, 0.40f, 0.60f, texActual, tinte, true);
+
+            // Barra de vida
+            float porcentaje = (float)jugador2->obtenerVida() / jugador2->obetenervidaMaxima();
+            porcentaje = std::fmax(0.0f, std::fmin(porcentaje, 1.0f));
+            renderer.dibujarRectangulo(
+                xPJ2, baseY + 0.60f,
+                0.25f * porcentaje, 0.03f,
+                glm::vec3(0.0f, 1.0f, 0.0f)
+            );
         }
 
         glBindVertexArray(0);
