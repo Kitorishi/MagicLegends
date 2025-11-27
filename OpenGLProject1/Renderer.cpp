@@ -1,4 +1,3 @@
-// Define esto ANTES de incluir el header para que la librería funcione
 #define STB_IMAGE_IMPLEMENTATION 
 #include "stb_image.h"
 
