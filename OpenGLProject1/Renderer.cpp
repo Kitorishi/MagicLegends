@@ -1,4 +1,4 @@
-// Define esto ANTES de incluir el header para que la librería funcione
+// Define esto ANTES de incluir el header para que la librerÃ­a funcione
 #define STB_IMAGE_IMPLEMENTATION 
 #include "stb_image.h"
 
@@ -19,16 +19,16 @@ Renderer::~Renderer()
     if (shaderProgram) glDeleteProgram(shaderProgram);
 }
 
-// Esta es la función CLAVE que faltaba actualizar
+// Esta es la funciÃ³n CLAVE que faltaba actualizar
 void Renderer::inicializar()
 {
     std::cout << "[Renderer] Inicializando...\n";
     shaderProgram = cargarShader("vertex_shader.glsl", "fragment_shader.glsl");
 
-    // === AQUÍ ESTABA EL PROBLEMA ===
+    // === AQUÃ ESTABA EL PROBLEMA ===
     // Antes solo enviabas X, Y. Ahora enviamos X, Y, U, V.
     float quadVertices[] = {
-        // Posición (X, Y)   // Textura (U, V)
+        // PosiciÃ³n (X, Y)   // Textura (U, V)
         -0.5f,  0.5f,        0.0f, 1.0f, // Arriba Izquierda
          0.5f,  0.5f,        1.0f, 1.0f, // Arriba Derecha
          0.5f, -0.5f,        1.0f, 0.0f, // Abajo Derecha
@@ -47,17 +47,17 @@ void Renderer::inicializar()
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    // Nota el tamaño: sizeof(quadVertices) ahora es más grande
+    // Nota el tamaÃ±o: sizeof(quadVertices) ahora es mÃ¡s grande
     glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quadIndices), quadIndices, GL_STATIC_DRAW);
 
-    // Atributo 0: Posición (2 floats). Salto total de 4 floats (stride)
+    // Atributo 0: PosiciÃ³n (2 floats). Salto total de 4 floats (stride)
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // Atributo 1: Coordenadas de Textura (2 floats). Empieza en el float número 2
+    // Atributo 1: Coordenadas de Textura (2 floats). Empieza en el float nÃºmero 2
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
@@ -70,14 +70,14 @@ void Renderer::inicializar()
     std::cout << "[Renderer] Inicializacion completa.\n";
 }
 
-// Función para cargar la imagen desde el archivo
+// FunciÃ³n para cargar la imagen desde el archivo
 GLuint Renderer::cargarTextura(const char* ruta)
 {
     GLuint textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
-    // Configuración para Pixel Art (GL_NEAREST para que no se vea borroso)
+    // ConfiguraciÃ³n para Pixel Art (GL_NEAREST para que no se vea borroso)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -102,8 +102,8 @@ GLuint Renderer::cargarTextura(const char* ruta)
     return textureID;
 }
 
-// Función para dibujar sprites (Personajes y Fondo)
-// Función para dibujar sprites (Personajes y Fondo) UPDATEADA
+// FunciÃ³n para dibujar sprites (Personajes y Fondo)
+// FunciÃ³n para dibujar sprites (Personajes y Fondo) UPDATEADA
 void Renderer::dibujarSprite(float x, float y, float ancho, float alto, GLuint texturaID, glm::vec3 tinte, bool voltearX)
 {
     if (!shaderProgram || !VAO) return;
@@ -120,7 +120,7 @@ void Renderer::dibujarSprite(float x, float y, float ancho, float alto, GLuint t
     GLint useTexLoc = glGetUniformLocation(shaderProgram, "useTexture");
     GLint samplerLoc = glGetUniformLocation(shaderProgram, "spriteTexture");
 
-    // === NUEVO: Ubicación del uniform de volteo ===
+    // === NUEVO: UbicaciÃ³n del uniform de volteo ===
     GLint flipLoc = glGetUniformLocation(shaderProgram, "flipX");
 
     // Enviar datos al shader
@@ -131,7 +131,7 @@ void Renderer::dibujarSprite(float x, float y, float ancho, float alto, GLuint t
     glUniform1i(useTexLoc, 1);  // 1 = ACTIVAR MODO TEXTURA
     glUniform1i(samplerLoc, 0); // Usar unidad de textura 0
 
-    // === NUEVO: Enviar el booleano de volteo ===
+    // Enviar el booleano de volteo ===
     // OpenGL usa enteros (1 o 0) para representar booleanos en glUniform1i
     glUniform1i(flipLoc, voltearX ? 1 : 0);
 
@@ -142,14 +142,14 @@ void Renderer::dibujarSprite(float x, float y, float ancho, float alto, GLuint t
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-// Función para dibujar rectángulos de colores (Barras de vida)
+// FunciÃ³n para dibujar rectÃ¡ngulos de colores (Barras de vida)
 void Renderer::dibujarRectangulo(float x, float y, float ancho, float alto, glm::vec3 color, int shapeType)
 {
     if (!shaderProgram || !VAO) return;
 
     glUseProgram(shaderProgram);
 
-    // IMPORTANTE: Desactivar modo textura para dibujar formas sólidas
+    // IMPORTANTE: Desactivar modo textura para dibujar formas sÃ³lidas
     glUniform1i(glGetUniformLocation(shaderProgram, "useTexture"), 0);
 
     glBindVertexArray(VAO);
