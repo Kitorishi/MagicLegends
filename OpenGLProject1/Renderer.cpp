@@ -25,8 +25,6 @@ void Renderer::inicializar()
     std::cout << "[Renderer] Inicializando...\n";
     shaderProgram = cargarShader("vertex_shader.glsl", "fragment_shader.glsl");
 
-    // === AQUÍ ESTABA EL PROBLEMA ===
-    // Antes solo enviabas X, Y. Ahora enviamos X, Y, U, V.
     float quadVertices[] = {
         // Posición (X, Y)   // Textura (U, V)
         -0.5f,  0.5f,        0.0f, 1.0f, // Arriba Izquierda
